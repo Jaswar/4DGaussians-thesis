@@ -174,12 +174,14 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
             pipe.debug = True
         images = []
         gt_images = []
+        masks = []
         radii_list = []
         visibility_filter_list = []
         viewspace_point_tensor_list = []
         for viewpoint_cam in viewpoint_cams:
             render_pkg = render(viewpoint_cam, gaussians, pipe, background, stage=stage,cam_type=scene.dataset_type)
             image, viewspace_point_tensor, visibility_filter, radii = render_pkg["render"], render_pkg["viewspace_points"], render_pkg["visibility_filter"], render_pkg["radii"]
+            masks.append(viewpoint_cam.mask.unsqueeze(0).unsqueeze(0))
             images.append(image.unsqueeze(0))
             if scene.dataset_type!="PanopticSports":
                 gt_image = viewpoint_cam.original_image.cuda()
@@ -195,12 +197,13 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
         radii = torch.cat(radii_list,0).max(dim=0).values
         visibility_filter = torch.cat(visibility_filter_list).any(dim=0)
         image_tensor = torch.cat(images,0)
+        masks = torch.cat(masks,0)
         gt_image_tensor = torch.cat(gt_images,0)
         # Loss
         # breakpoint()
-        Ll1 = l1_loss(image_tensor, gt_image_tensor[:,:3,:,:])
+        Ll1 = l1_loss(image_tensor * masks, gt_image_tensor[:,:3,:,:] * masks)
 
-        psnr_ = psnr(image_tensor, gt_image_tensor).mean().double()
+        psnr_ = psnr(image_tensor, gt_image_tensor, masks).mean().double()
         # norm
         
 
@@ -210,7 +213,7 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
             tv_loss = gaussians.compute_regulation(hyper.time_smoothness_weight, hyper.l1_time_planes, hyper.plane_tv_weight)
             loss += tv_loss
         if opt.lambda_dssim != 0:
-            ssim_loss = ssim(image_tensor,gt_image_tensor)
+            ssim_loss = ssim(image_tensor * masks, gt_image_tensor * masks)
             loss += opt.lambda_dssim * (1.0-ssim_loss)
         # if opt.lambda_lpips !=0:
         #     lpipsloss = lpips_loss(image_tensor,gt_image_tensor,lpips_model)
@@ -363,10 +366,12 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
                                 tb_writer.add_images(stage + "/"+config['name'] + "_view_{}/ground_truth".format(viewpoint.image_name), gt_image[None], global_step=iteration)
                     except:
                         pass
+                    image = image.unsqueeze(0)
+                    gt_image = gt_image.unsqueeze(0)
+                    mask=viewpoint.mask.unsqueeze(0).unsqueeze(0)
                     l1_test += l1_loss(image, gt_image).mean().double()
-                    # mask=viewpoint.mask
                     
-                    psnr_test += psnr(image, gt_image, mask=None).mean().double()
+                    psnr_test += psnr(image, gt_image, mask=mask).mean().double()
                 psnr_test /= len(config['cameras'])
                 l1_test /= len(config['cameras'])          
                 print("\n[ITER {}] Evaluating {}: L1 {} PSNR {}".format(iteration, config['name'], l1_test, psnr_test))

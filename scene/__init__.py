@@ -61,6 +61,9 @@ class Scene:
         elif os.path.exists(os.path.join(args.source_path,"points3D_multipleview.ply")):
             scene_info = sceneLoadTypeCallbacks["MultipleView"](args.source_path)
             dataset_type="MultipleView"
+        elif os.path.exists(os.path.join(args.source_path, 'ordering.txt')):
+            scene_info = sceneLoadTypeCallbacks['EgoExo'](args.source_path, args.eval)
+            dataset_type = 'EgoExo'
         else:
             assert False, "Could not recognize scene type!"
         self.maxtime = scene_info.maxtime
