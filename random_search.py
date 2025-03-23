@@ -1,6 +1,7 @@
 import os
 import random
 import time
+import argparse
 
 
 TEMPLATE_CONFIG = '''
@@ -109,9 +110,12 @@ def main(data_path, model_path, timeout=5 * 60 * 60):
         write_config(config, config_path)
         run_experiment(data_path, model_path, config_path)
         config_index += 1
-        break
 
 if __name__ == '__main__':
-    data_path = 'ego_exo_data/all_saves/camera-rgb/georgiatech_covid_03_4'
-    model_path = 'ego_exo/random_search/camera-rgb/georgiatech_covid_03_4'
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_path', type=str)
+    parser.add_argument('--model_path', type=str)
+    args = parser.parse_args()
+    data_path = args.data_path
+    model_path = args.model_path
     main(data_path, model_path)

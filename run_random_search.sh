@@ -1,0 +1,1 @@
+python random_search.py --data_path ego_exo_data/all_saves/camera-rgb/georgiatech_covid_03_4 --model_path ego_exo/random_search/camera-rgb/georgiatech_covid_03_4
