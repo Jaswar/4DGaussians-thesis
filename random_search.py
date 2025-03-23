@@ -84,7 +84,6 @@ def write_config(config, path):
     new_config = TEMPLATE_CONFIG
     for key, value in config.items():
         new_config = new_config.replace(f'<{key}>', str(value))
-    print(new_config)
     with open(path, 'w') as f:
         f.write(new_config)
 
@@ -94,8 +93,8 @@ def execute_in_env(command, env):
 
 def run_experiment(data_path, model_path, config_path, env='kplanes'):
     os.makedirs(model_path, exist_ok=True)
-    execute_in_env(f'python train.py -s \"{data_path}\"' \
-                   f'--port 6017 --expname \"{model_path}\"' \
+    execute_in_env(f'python train.py -s \"{data_path}\" ' \
+                   f'--port 6017 --expname \"{model_path}\" ' \
                    f'--configs \"{config_path}\"', '4dgs')
 
 def main(data_path, model_path, timeout=5 * 60 * 60):
@@ -113,6 +112,6 @@ def main(data_path, model_path, timeout=5 * 60 * 60):
         break
 
 if __name__ == '__main__':
-    data_path = 'ego_exo_data/all_saves/georgiatech_covid_03_4'
-    model_path = 'output/ego_exo/random_search/georgiatech_covid_03_4'
-    main()
+    data_path = 'ego_exo_data/all_saves/camera-rgb/georgiatech_covid_03_4'
+    model_path = 'ego_exo/random_search/camera-rgb/georgiatech_covid_03_4'
+    main(data_path, model_path)
