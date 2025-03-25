@@ -10,3 +10,6 @@ data/
 data
 submodules/
 ego_exo_data
+gaussians4d_container.sif
+gaussians4d_container/
+gaussians_4d.def

@@ -90,7 +90,7 @@ def write_config(config, path):
 
 
 def execute_in_env(command, env):
-    os.system(f'/bin/bash -c \"source ~/anaconda3/etc/profile.d/conda.sh && conda activate {env} && {command} \"')
+    os.system(f'/bin/bash -c \"source /opt/anaconda3/etc/profile.d/conda.sh && conda activate {env} && {command} \"')
 
 def run_experiment(data_path, model_path, config_path, env='kplanes'):
     os.makedirs(model_path, exist_ok=True)
@@ -106,9 +106,9 @@ def main(data_path, model_path, timeout=5 * 60 * 60):
     while time.time() - start_time < timeout:
         config = sample_config()
         config_path = os.path.join(configs_path, f'config_{config_index}.py')
-        model_path = os.path.join(model_path, f'model_{config_index}')
+        model_path_ = os.path.join(model_path, f'model_{config_index}')
         write_config(config, config_path)
-        run_experiment(data_path, model_path, config_path)
+        run_experiment(data_path, model_path_, config_path)
         config_index += 1
 
 if __name__ == '__main__':
