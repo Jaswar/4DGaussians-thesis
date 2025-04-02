@@ -90,13 +90,13 @@ def write_config(config, path):
 
 
 def execute_in_env(command, env):
-    os.system(f'/bin/bash -c \"source /opt/anaconda3/etc/profile.d/conda.sh && conda activate {env} && {command} \"')
+    os.system(f'/bin/bash -c \"source /opt/miniconda3/etc/profile.d/conda.sh && conda activate {env} && {command} \"')
 
-def run_experiment(data_path, model_path, config_path, env='kplanes'):
+def run_experiment(data_path, model_path, config_path):
     os.makedirs(model_path, exist_ok=True)
     execute_in_env(f'python train.py -s \"{data_path}\" ' \
                    f'--port 6017 --expname \"{model_path}\" ' \
-                   f'--configs \"{config_path}\"', '4dgs')
+                   f'--configs \"{config_path}\"', 'Gaussians4D')
 
 def main(data_path, model_path, timeout=5 * 60 * 60):
     configs_path = './arguments/ego_exo/random_configs'
